@@ -274,9 +274,9 @@ def trapezoid(a, b, c, d, x, maximum, minimum):
     min and max should always be 0 & 1 because this function is being used to set probabilities
        |
     max|       -------
-       |      |        \
-       |     |           \
-    min|____|______________\_______
+       |      |        \\
+       |     |           \\
+    min|____|______________\\_______
             a  b      c    d
     """
     if x < a:

@@ -1,0 +1,76 @@
+#VRML_SIM R2023b utf8
+
+IMPORTABLE EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puckGroundSensors.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+
+WorldInfo {
+  info [
+    "This behavior-based controller allows the e-puck robot to follow the black line, avoid obstacles and recover its path afterwards."
+    "This model of the e-puck is equipped with ground sensors, located at the front of the e-puck."
+    "Thanks to Jean-Christophe Zufferey (EPFL-LIS)."
+  ]
+  title "CPE416 Localization Lab"
+  coordinateSystem "NUE"
+  lineScale 0.04
+}
+Viewpoint {
+  orientation 0.7563470602210552 -0.5771045861220689 0.3080412653717727 4.156696327503465
+  position -0.36524285916117716 0.902207642268679 0.19066229360498543
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  translation -2.22044e-18 -0.02 -4.4409e-18
+  rotation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0943951023931953
+  floorSize 0.7 0.7
+  floorTileSize 0.7 0.7
+  floorAppearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "textures/CPE416_webots_localization_floor.png"
+      ]
+    }
+    roughness 0.2
+    metalness 0
+  }
+  wallHeight 0.05
+}
+DEF EPUCK E-puck {
+  hidden position_0_0 1.3438827687991006
+  hidden position_0_1 1.3438827690745614
+  hidden rotation_1 0 -1 0 4.206117467633411
+  hidden rotation_2 0 -0.9999999999999999 0 4.2061174708635285
+  translation -0.123105 -0.020064 0.15828
+  rotation -0.9999849431089444 0.0038791053516095326 0.0038815070619733546 1.5708113756644198
+  name "follow"
+  controller "my_controller"
+  controllerArgs [
+    ""
+  ]
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}
+DEF EPUCK E-puck {
+  hidden position_0_0 1.3438827687991006
+  hidden position_0_1 1.3438827690745614
+  hidden rotation_1 0 -1 0 4.206117467633411
+  hidden rotation_2 0 -1 0 4.206117470863529
+  translation -0.00318423 -0.0200638 0.187657
+  rotation -0.9999849431089444 0.0038791053516095326 0.0038815070619733546 1.5708113756644198
+  name "lead"
+  controller "<extern>"
+  controllerArgs [
+    ""
+  ]
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}

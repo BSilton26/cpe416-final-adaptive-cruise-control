@@ -15,8 +15,11 @@ RIGHT = 2
 LEFT_MOTOR = 0
 RIGHT_MOTOR = 1
 
-KP = 0.001  # Proportional control constant
-
+VELOCITY_KP = 0.001  # Proportional control for cruise-control velocity pid
+ANGULAR_KP = 0.01
+VELOCITY_KI = 0.1 # integral gain constant for cruise-control velocity pid
+VELOCITY_KD = 0.1 # derivative gain constant for cruise-control velocity pid
+FOLLOW_DISTANCE = 65 # distance sensor reading that is the minimum comfortable follow distance, PID will target this
 
 class Vehicle:
     def __init__(self, angular_kp=ANGULAR_KP,
@@ -65,7 +68,13 @@ class Vehicle:
         # Ensure encoders have time to initialize to non-NaN vals
         while any([isnan(e) for e in self.get_encoder_values()]):
             self.robot.step(self.timestep)
-        self.kp = kp  # Proportional control constant
+        # Proportional control constants
+        self.angular_kp = angular_kp
+        self.velocity_kp = velocity_kp
+        self.velocity_ki = velocity_ki
+        self.velocity_kd = velocity_kd
+        self.past_errors = [] # queue to maintain the past n error values for integral calculation
+        self.follow_distance = follow_distance
 
     def step(self):
         return self.robot.step(self.timestep)
@@ -105,6 +114,8 @@ class Vehicle:
         # collect distances
         front_left_distance = self.front_left_distance_sensor.getValue()
         front_right_distance = self.front_right_distance_sensor.getValue()
+        closest_distance = max(front_left_distance, front_right_distance)
+        self.update_error(closest_distance)
 
         if closest_distance <= too_far:
             self.current_velocity = self.target_velocity
@@ -144,7 +155,7 @@ class Vehicle:
         :param dryrun: If True, doesn't modify the last_encoder_values attribute, defaults to False
         :return: a len-2 list of the current left and right encoder values, plus Gaussian noise
         """
-        [left, right] = [e.getValue() + add_noise(std_dev=0.02) for e in self.encoders]
+        [left, right] = [e.getValue() for e in self.encoders]
         if not dryrun:
             self.last_encoder_values = [left, right]
         return [left, right]

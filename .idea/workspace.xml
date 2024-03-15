@@ -5,12 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f73f0031-e33a-4e45-adb2-9e67ae644128" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/cpe416-final-adaptive-cruise-control.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/cpe416-final-adaptive-cruise-control.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cpe416-final-adaptive-cruise-control.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/follow_controller/follow_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/follow_controller/follow_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/worlds/.CPE416_Winter24.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/.CPE416_Winter24.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/worlds/.CPE416_Winter24.wbproj" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/.CPE416_Winter24.wbproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/worlds/CPE416_Winter24.wbt" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/CPE416_Winter24.wbt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +35,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/cameronmcclure-coleman/Documents/CalPolyCourseWork/CPE416/cpe416-final-adaptive-cruise-control/controllers/lead_controller&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -43,6 +45,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/controllers/lead_controller" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="Follow" type="PythonConfigurationType" factoryName="Python">
       <module name="cpe416-final-adaptive-cruise-control" />
@@ -54,7 +61,6 @@
         <env name="DYLD_LIBRARY_PATH" value="/Applications/Webots.app/lib/controller" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.12 (cpe416-final-adaptive-cruise-control)" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -86,6 +92,10 @@
       <option name="presentableId" value="Default" />
       <updated>1710181986084</updated>
       <workItem from="1710181989919" duration="1576000" />
+      <workItem from="1710355563926" duration="1308000" />
+      <workItem from="1710358357078" duration="1109000" />
+      <workItem from="1710373840965" duration="1581000" />
+      <workItem from="1710522976980" duration="3684000" />
     </task>
     <servers />
   </component>

@@ -15,61 +15,20 @@ RIGHT = 2
 LEFT_MOTOR = 0
 RIGHT_MOTOR = 1
 
-BASE_VELOCITY = 1.0
-NUM_PARTICLES = 100
-NUM_RANDOM_PARTICLES = 5
-
 KP = 0.001  # Proportional control constant
-
-TOWERS = [90, 180, 270]  # The angle locations of the towers
-TARGET = 1  # The tower to target, indexed from 1
-
-# Constants measured within the simulation
-OUTER_ENCODER_PER_REV = 65.77672
-INNER_ENCODER_PER_REV = 47.68404
-
-TOWER_ARC_WIDTH = 24  # in degrees
-
-STD_DEV_THRESHOLD = 20
-
-
-class Particle:
-    """Class to represent a particle."""
-    def __init__(self, position=None, weight=None):
-        """Constructor.
-        :param position: The position of the particle. Randomized if None.
-        :param weight: The weight of the particle. Randomized if None.
-        """
-        if position is not None:
-            self.position = position
-        else:
-            self.position = 360 * random()
-        if weight is not None:
-            self.weight = weight
-        else:
-            self.weight = random()
-        self.is_tower = None
-
-    def update_position(self, difference):
-        self.position += difference
-        self.position %= 360
-
-    def __str__(self):
-        return f'{self.position:.0f} {self.weight:.2f}'
-
-    def __repr__(self):
-        return f'{self.position:.0f} {self.weight:.2f} {self.is_tower}'
 
 
 class Vehicle:
-    def __init__(self, towers=None, target=None, kp=KP, particles=NUM_PARTICLES):
-        if towers is None:
-            self.towers = []  # Necessary to avoid default value being mutable
+    def __init__(self, kp=KP):
         # Most of this stuff is copied from the provided my_controller file.
         # The majority don't even really NEED to be instance variables,
         # but I've made them so for convenience, just in case.
         # Create the Robot instance.
         self.robot = Robot()
+        # velocity
+        self.target_velocity = 25
+        self.current_velocity = 25
+
         # get the time step of the current world.
         self.timestep = int(self.robot.getBasicTimeStep())
         # enable the drive motors
@@ -87,8 +46,10 @@ class Vehicle:
         self.right_ground_sensor = self.robot.getDevice('gs2')
         self.right_ground_sensor.enable(self.timestep)
         # enable right distance sensor
-        self.right_distance_sensor = self.robot.getDevice('ps2')  # IR sensor pointing to the right
-        self.right_distance_sensor.enable(self.timestep)
+        self.front_left_distance_sensor = self.robot.getDevice('ps7')  # IR sensor pointing to the right
+        self.front_left_distance_sensor.enable(self.timestep)
+        self.front_right_distance_sensor = self.robot.getDevice('ps0')
+        self.front_right_distance_sensor.enable(self.timestep)
         # initialize encoders
         self.last_encoder_values = [None, None]
         self.encoders = []
@@ -101,58 +62,41 @@ class Vehicle:
         while any([isnan(e) for e in self.get_encoder_values()]):
             self.robot.step(self.timestep)
         self.kp = kp  # Proportional control constant
-        # Now begin monte carlo stuff
-        # Initial values
-        self.location = 0.0  # Location of robot in circle
-        # Initialize our particle cloud
-        self.num_particles = particles
-        self.particles = []
-        for p in range(self.num_particles):
-            self.particles.append(Particle())
-        # Initialize tower models
-        self.towers = towers
-        self.tower_bounds = []  # will be useful for determining if a particle is adjacent to a tower
-        for tower in self.towers:
-            lower_bound = ((tower - TOWER_ARC_WIDTH / 2) + 360) % 360  # + and % so values like -12
-            upper_bound = ((tower + TOWER_ARC_WIDTH / 2) + 360) % 360  # will wrap to 348
-            self.tower_bounds.append((lower_bound, upper_bound))
-        print(f'Tower bounds: {self.tower_bounds}')
-        self.target = target - 1  # modify target so it is indexed from 0
 
     def step(self):
         return self.robot.step(self.timestep)
 
-    def update_position(self, dryrun=False) -> float:
-        """Update the vehicle's current position.
-        If a dry run, just returns the number of degrees the robot has traveled since the last
-        non-dry run.
-        Otherwise, modifies self.location, adding the estimated number of degrees the robot has
-        traveled thus far.
-
-        :returns: the degrees the robot has traveled according to the difference in the encoders.
-        """
-        # Compare encoders to see how much the motors have moved
-        previous_encoders = self.last_encoder_values
-        current_encoders = self.get_encoder_values(dryrun=dryrun)
-        encoder_diff = [curr - prev for curr, prev in zip(current_encoders, previous_encoders)]
-        # Estimate degrees traveled based on the average of the encoder readings from both motors
-        degrees_traveled_inner = (encoder_diff[LEFT_MOTOR] / INNER_ENCODER_PER_REV) * 360
-        degrees_traveled_outer = (encoder_diff[RIGHT_MOTOR] / OUTER_ENCODER_PER_REV) * 360
-        degrees_traveled = (degrees_traveled_inner + degrees_traveled_outer) / 2.0
-        if not dryrun:
-            print("Updating position")
-            print(f"last position: {self.location}")
-            print(f"degrees_traveled: {degrees_traveled}")
-            self.location += degrees_traveled
-            self.location %= 360
-            print(f"new position: {self.location}")
-        return degrees_traveled
-
     def p_control(self):
         """Modifies motor speeds according to the given error and proportional constant"""
-        speed_adjustment = self.kp * self.calc_ground_error()
-        self.left_motor.setVelocity(BASE_VELOCITY - speed_adjustment)
-        self.right_motor.setVelocity(BASE_VELOCITY + speed_adjustment)
+        speed_adjustment = self.kp * self.calc_ground_error() # todo: make adjustment proportional to current speed
+        self.left_motor.setVelocity(self.current_velocity - speed_adjustment)
+        self.right_motor.setVelocity(self.current_velocity + speed_adjustment)
+
+    def p_velocity_control(self, distance):
+        return 0
+
+    def i_velocity_control(self, distance):
+        return 0
+
+    def d_velocity_control(self, distance):
+        return 0
+
+    def pid_velocity_control(self, distance):
+        too_far = 20
+        # collect distances
+        front_left_distance = self.front_left_distance_sensor.getValue()
+        front_right_distance = self.front_right_distance_sensor.getValue()
+
+        if front_left_distance <= too_far and front_right_distance <= too_far:
+            return self.target_velocity
+        elif front_left_distance > too_far:
+            # something is in front of the robot. do pid logic to slow down in order to not hit it
+            pid_correction = self.p_velocity_control(front_left_distance) + self.i_velocity_control(front_left_distance) + self.d_velocity_control(front_left_distance)
+            return pid_correction
+        elif front_right_distance > too_far:
+            pid_correction = self.p_velocity_control(front_right_distance) + self.i_velocity_control(front_right_distance) + self.d_velocity_control(front_left_distance)
+            return pid_correction
+
 
     def get_right_distance_reading(self) -> float:
         """Returns the current reading from the right distance sensor"""
@@ -197,8 +141,8 @@ class Vehicle:
 
         Goes straight forward and prints sensor vals to console. Basically unused.
         """
-        self.left_motor.setVelocity(BASE_VELOCITY)  # set the left motor (radians/second)
-        self.right_motor.setVelocity(BASE_VELOCITY)  # set the right motor (radians/second)
+        self.left_motor.setVelocity(self.target_velocity)  # set the left motor (radians/second)
+        self.right_motor.setVelocity(self.target_velocity)  # set the right motor (radians/second)
         print(self.left_motor.getVelocity())
         print(self.left_ground_sensor.getValue())
         print(self.middle_ground_sensor.getValue())
@@ -207,28 +151,6 @@ class Vehicle:
         new_encoder_values = self.get_encoder_values()
         print(new_encoder_values)
         print('-------------------------')
-
-    def update_particles(self, degrees_traveled: float, distance_reading: float):
-        """Updates the probabilities for each particle.
-
-        :param degrees_traveled: the number of degrees traveled since the last update.
-        :param distance_reading: the right distance reading to weight the particles by
-        """
-        print('Updating particles')
-        print(f'moving particles {degrees_traveled} degrees')
-        for particle in self.particles:
-            particle.update_position(degrees_traveled)
-            # Assign a boolean to each particle which identifies whether it's expected to be a tower
-            particle.is_tower = self.is_tower(particle.position)
-            # ... and weight each particle accordingly
-            if self.is_tower(particle.position):
-                particle.weight = trapezoid_tower(distance_reading)
-            else:
-                particle.weight = trapezoid_free_space(distance_reading)
-        # Now normalize weights
-        total_weight = sum(particle.weight for particle in self.particles)
-        for particle in self.particles:
-            particle.weight = particle.weight / total_weight
 
     def is_tower(self, position) -> bool:
         """Returns True if the position is expected to be adjacent to a tower. False otherwise."""

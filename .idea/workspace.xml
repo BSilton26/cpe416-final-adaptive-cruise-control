@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f73f0031-e33a-4e45-adb2-9e67ae644128" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/cpe416-final-adaptive-cruise-control.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cpe416-final-adaptive-cruise-control.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="f73f0031-e33a-4e45-adb2-9e67ae644128" name="Changes" comment="follow controller updates still need pid functions">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/follow_controller/follow_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/follow_controller/follow_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/worlds/.CPE416_Winter24.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/.CPE416_Winter24.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/worlds/.CPE416_Winter24.wbproj" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/.CPE416_Winter24.wbproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/worlds/CPE416_Winter24.wbt" beforeDir="false" afterPath="$PROJECT_DIR$/worlds/CPE416_Winter24.wbt" afterDir="false" />
+    </list>
+    <list id="db839965-d9d0-4238-9c5a-a2aeed18ad44" name="Changes by bsilton" comment="">
+      <change beforePath="$PROJECT_DIR$/controllers/follow_controller/follow_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/follow_controller/follow_controller.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,6 +18,45 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "camjmc03"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="522b3bbe-9b39-446b-848f-e12d168af549" />
+        <option name="url" value="https://github.com/BSilton26/cpe416-final-adaptive-cruise-control.git" />
+      </UrlAndAccount>
+    </option>
+  </component>
+  <component name="LineStatusTrackerManager">
+    <file path="$PROJECT_DIR$/controllers/follow_controller/follow_controller.py">
+      <ranges>
+        <range start1="17" end1="19" start2="17" end2="22" changelist="db839965-d9d0-4238-9c5a-a2aeed18ad44" />
+        <range start1="21" end1="22" start2="24" end2="29" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="63" end1="64" start2="70" end2="77" changelist="db839965-d9d0-4238-9c5a-a2aeed18ad44" />
+        <range start1="68" end1="69" start2="81" end2="82" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="70" end1="71" start2="83" end2="84" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="74" end1="76" start2="87" end2="91" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="77" end1="79" start2="92" end2="96" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="80" end1="82" start2="97" end2="99" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="83" end1="85" start2="100" end2="113" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="88" end1="88" start2="116" end2="118" changelist="db839965-d9d0-4238-9c5a-a2aeed18ad44" />
+        <range start1="89" end1="92" start2="119" end2="122" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="93" end1="103" start2="123" end2="127" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="133" end1="134" start2="157" end2="158" changelist="db839965-d9d0-4238-9c5a-a2aeed18ad44" />
+        <range start1="153" end1="245" start2="177" end2="177" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="250" end1="255" start2="182" end2="183" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="257" end1="260" start2="185" end2="187" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="261" end1="271" start2="188" end2="188" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="272" end1="276" start2="189" end2="189" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+        <range start1="277" end1="278" start2="190" end2="190" changelist="f73f0031-e33a-4e45-adb2-9e67ae644128" />
+      </ranges>
+    </file>
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -97,9 +134,30 @@
       <workItem from="1710373840965" duration="1581000" />
       <workItem from="1710522976980" duration="3684000" />
     </task>
+    <task id="LOCAL-00001" summary="follow controller updates still need pid functions">
+      <option name="closed" value="true" />
+      <created>1710528315383</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1710528315383</updated>
+    </task>
+    <task id="LOCAL-00002" summary="follow controller updates still need pid functions">
+      <option name="closed" value="true" />
+      <created>1710528338003</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1710528338003</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="follow controller updates still need pid functions" />
+    <option name="LAST_COMMIT_MESSAGE" value="follow controller updates still need pid functions" />
   </component>
 </project>

@@ -17,13 +17,14 @@ RIGHT_MOTOR = 1
 
 VELOCITY_KP = 0.001  # Proportional control for cruise-control velocity pid
 ANGULAR_KP = 0.01
-VELOCITY_KI = 0.1 # integral gain constant for cruise-control velocity pid
-VELOCITY_KD = 0.1 # derivative gain constant for cruise-control velocity pid
-FOLLOW_DISTANCE = 65 # distance sensor reading that is the minimum comfortable follow distance, PID will target this
+VELOCITY_KI = 0.1  # integral gain constant for cruise-control velocity pid
+VELOCITY_KD = 0.1  # derivative gain constant for cruise-control velocity pid
+FOLLOW_DISTANCE = 65  # distance sensor reading that is the minimum comfortable follow distance, PID will target this
+
 
 class Vehicle:
     def __init__(self, angular_kp=ANGULAR_KP,
-                 velocity_kp = VELOCITY_KP,
+                 velocity_kp=VELOCITY_KP,
                  velocity_ki=VELOCITY_KI,
                  velocity_kd=VELOCITY_KD,
                  follow_distance=FOLLOW_DISTANCE):
@@ -73,7 +74,7 @@ class Vehicle:
         self.velocity_kp = velocity_kp
         self.velocity_ki = velocity_ki
         self.velocity_kd = velocity_kd
-        self.past_errors = [] # queue to maintain the past n error values for integral calculation
+        self.past_errors = []  # queue to maintain the past n error values for integral calculation
         self.follow_distance = follow_distance
 
     def step(self):
@@ -81,7 +82,7 @@ class Vehicle:
 
     def p_angular_control(self):
         """Modifies motor speeds according to the given error and proportional constant"""
-        speed_adjustment = self.angular_kp * self.calc_ground_error() # todo: make adjustment proportional to current speed
+        speed_adjustment = self.angular_kp * self.calc_ground_error()  # todo: make adjustment proportional to current speed
         self.left_motor.setVelocity(self.current_velocity - speed_adjustment)
         self.right_motor.setVelocity(self.current_velocity + speed_adjustment)
 
@@ -96,7 +97,7 @@ class Vehicle:
         return accumulated_error * self.velocity_ki
 
     def d_velocity_control(self) -> float:
-        return 0.0 # no derivative term; I don't wanna.
+        return 0.0  # no derivative term; I don't wanna.
 
     def update_error(self, distance):
         # calculate current error
@@ -175,6 +176,7 @@ class Vehicle:
         new_encoder_values = self.get_encoder_values()
         print(new_encoder_values)
         print('-------------------------')
+
 
 # Main loop:
 # - perform simulation steps until Webots stops the controller

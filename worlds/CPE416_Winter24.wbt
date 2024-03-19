@@ -40,10 +40,10 @@ RectangleArena {
   }
   wallHeight 0.05
 }
-DEF EPUCK E-puck {
+DEF FOLLOW E-puck {
   hidden position_0_0 1.3438827378436233
   hidden position_0_1 1.3438827381191225
-  hidden rotation_1 0 -1 0 4.206117498588888
+  hidden rotation_1 0 -0.9999999999999999 0 4.206117498588889
   hidden rotation_2 0 -1 0 4.2061175018189685
   translation -0.12310500009696645 -0.02006396203316351 0.15828000000075337
   rotation -0.9999849431104801 0.003880141165858205 0.003880471216558101 1.5708113837018014
@@ -57,7 +57,7 @@ DEF EPUCK E-puck {
     }
   ]
 }
-DEF EPUCK E-puck {
+DEF LEAD E-puck {
   hidden position_0_0 1.3438827378436669
   hidden position_0_1 1.343882738119124
   hidden rotation_1 0 -1 0 4.206117498588845

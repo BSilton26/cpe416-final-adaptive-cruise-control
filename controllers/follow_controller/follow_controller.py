@@ -15,10 +15,10 @@ RIGHT = 2
 LEFT_MOTOR = 0
 RIGHT_MOTOR = 1
 
-VELOCITY_KP = 0.001  # Proportional control for cruise-control velocity pid
+VELOCITY_KP = 0.1  # Proportional control for cruise-control velocity pid
 ANGULAR_KP = 0.001
-VELOCITY_KI = 0.1  # integral gain constant for cruise-control velocity pid
-VELOCITY_KD = 0.1  # derivative gain constant for cruise-control velocity pid
+VELOCITY_KI = 0.001  # integral gain constant for cruise-control velocity pid
+VELOCITY_KD = -0.01  # derivative gain constant for cruise-control velocity pid
 FOLLOW_DISTANCE = 80  # distance sensor reading that is the minimum comfortable follow distance, PID will target this
 
 
@@ -64,7 +64,7 @@ class Vehicle:
         self.velocity_kp = velocity_kp
         self.velocity_ki = velocity_ki
         self.velocity_kd = velocity_kd
-        self.past_errors = []  # queue to maintain the past n error values for integral calculation
+        self.past_errors = 10 * [(0, 0)]  # queue to maintain the past n error values for integral calculation
         self.follow_distance = follow_distance
 
     def step(self):
@@ -94,15 +94,16 @@ class Vehicle:
     def p_velocity_control(self, error) -> float:
         """Modifies the target speed according to proportional constant"""
         target_velocity_adjustment = self.velocity_kp * error
-        return round(target_velocity_adjustment)
+        return target_velocity_adjustment
 
     def i_velocity_control(self) -> float:
         # sum the errors
-        accumulated_error = sum(self.past_errors)
-        return accumulated_error * self.velocity_ki
+        accumulated_error = sum([e[0] for e in self.past_errors])
+        integral = accumulated_error / len(self.past_errors)
+        return integral * self.velocity_ki
 
     def d_velocity_control(self) -> float:
-        return 0.0  # no derivative term; I don't wanna.
+        return self.calc_error_rate() * self.velocity_kd
 
     def update_error(self, distance):
         # calculate current error
@@ -110,11 +111,13 @@ class Vehicle:
             current_error = distance - self.follow_distance
         else:
             current_error = 0
+        time_of_measurement = self.robot.getTime()
         # add the current error to the recent error queue
         # TODO: There is a more efficient way to do this, perhaps with queue.Queue
-        if len(self.past_errors) >= 10:
-            self.past_errors = self.past_errors[:10]
-            self.past_errors.insert(0, current_error)
+        if len(self.past_errors) > 9:
+            self.past_errors = self.past_errors[len(self.past_errors) - 9:]  # Leave one space
+            self.past_errors.append((current_error, time_of_measurement))
+            assert len(self.past_errors) == 10
 
     def pid_velocity_correction(self):
         too_far = self.follow_distance
@@ -123,17 +126,13 @@ class Vehicle:
         front_right_distance = self.front_right_distance_sensor.getValue()
         closest_distance = max(front_left_distance, front_right_distance)
         self.update_error(closest_distance)
-
-        if closest_distance <= too_far:
-            self.current_velocity = self.target_velocity
-        else:
-            # something is in front of the robot. do pid logic to slow down in order to not hit it
-            p_vel = self.p_velocity_control(closest_distance - self.follow_distance)
-            i_vel = self.i_velocity_control()
-            d_vel = self.d_velocity_control()
-            print(f'{p_vel=}\n{i_vel=}\n{d_vel=}')
-            pid_correction = p_vel + i_vel + d_vel
-            self.current_velocity = pid_correction
+        # Calculate pid velocity adjustment
+        p_vel = self.p_velocity_control(closest_distance - self.follow_distance)
+        i_vel = self.i_velocity_control()
+        d_vel = self.d_velocity_control()
+        pid_correction = p_vel + i_vel + d_vel
+        self.current_velocity = min(self.target_velocity - pid_correction, self.target_velocity)
+        print(f'{self.current_velocity=}')
 
     def get_ground_sensors(self) -> list:
         """Returns an array of the current ground sensor readings."""
@@ -157,6 +156,15 @@ class Vehicle:
         r_err = middle_sensor - right_sensor
         total_err = l_err - r_err
         return total_err
+
+    def calc_error_rate(self):
+        """Samples the follow distance error to determine rate of change"""
+        # Get two most recent error readings
+        tup0, tup1 = self.past_errors[-1], self.past_errors[-2]
+        e0, e1 = tup0[0], tup1[0]
+        t0, t1 = tup0[1], tup1[1]
+        d = (e1 - e0) / (t1 - t0)
+        return d
 
 
 def main():

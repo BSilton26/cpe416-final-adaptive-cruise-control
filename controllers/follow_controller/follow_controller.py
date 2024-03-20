@@ -1,12 +1,8 @@
-""" Lab 4
+""" Final project
 Names:       Blake Silton and Cameron McClure-Coleman
-Description: Search and Destroy. Use Monte Carlo localization to figure out the simulated robot's
-             position and take out the target.
+Description: Adaptive cruise control. Maintain a minimum follow distance and a maximum speed behind the lead vehicle.
 """
 from controller import Robot, Motor, LightSensor, DistanceSensor
-from random import random, choices
-from math import sqrt, log, cos, pi, isnan
-from statistics import mode, stdev
 
 LEFT = 0
 MIDDLE = 1
@@ -120,7 +116,6 @@ class Vehicle:
             assert len(self.past_errors) == 10
 
     def pid_velocity_correction(self):
-        too_far = self.follow_distance
         # collect distances
         front_left_distance = self.front_left_distance_sensor.getValue()
         front_right_distance = self.front_right_distance_sensor.getValue()

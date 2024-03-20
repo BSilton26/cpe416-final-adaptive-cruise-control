@@ -95,8 +95,7 @@ class Vehicle:
     def i_velocity_control(self) -> float:
         # sum the errors
         accumulated_error = sum([e[0] for e in self.past_errors])
-        integral = accumulated_error / len(self.past_errors)
-        return integral * self.velocity_ki
+        return accumulated_error * self.velocity_ki
 
     def d_velocity_control(self) -> float:
         return self.calc_error_rate() * self.velocity_kd

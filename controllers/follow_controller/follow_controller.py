@@ -106,7 +106,6 @@ class Vehicle:
 
     def update_error(self, distance):
         # calculate current error
-        print(f"{distance=}")
         if distance <= self.follow_distance:
             current_error = distance - self.follow_distance
         else:
@@ -115,7 +114,7 @@ class Vehicle:
         # TODO: There is a more efficient way to do this, perhaps with queue.Queue
         if len(self.past_errors) >= 10:
             self.past_errors = self.past_errors[:10]
-            self.past_errors.append(current_error)
+            self.past_errors.insert(0, current_error)
 
     def pid_velocity_correction(self):
         too_far = self.follow_distance
@@ -129,9 +128,11 @@ class Vehicle:
             self.current_velocity = self.target_velocity
         else:
             # something is in front of the robot. do pid logic to slow down in order to not hit it
-            pid_correction = (self.p_velocity_control(closest_distance) +
-                              self.i_velocity_control() +
-                              self.d_velocity_control())
+            p_vel = self.p_velocity_control(closest_distance - self.follow_distance)
+            i_vel = self.i_velocity_control()
+            d_vel = self.d_velocity_control()
+            print(f'{p_vel=}\n{i_vel=}\n{d_vel=}')
+            pid_correction = p_vel + i_vel + d_vel
             self.current_velocity = pid_correction
 
     def get_ground_sensors(self) -> list:
@@ -163,7 +164,6 @@ def main():
     vehicle = Vehicle(3.5)
     while vehicle.step() != -1:
         # Follow line
-        print(f'{vehicle.current_velocity=}')
         vehicle.pid_velocity_correction()
         vehicle.p_angular_control()
 

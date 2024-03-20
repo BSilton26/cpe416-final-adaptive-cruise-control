@@ -3,7 +3,7 @@ Names:       Blake Silton and Cameron McClure-Coleman
 Description: Search and Destroy. Use Monte Carlo localization to figure out the simulated robot's
              position and take out the target.
 """
-from controller import Robot, Motor
+from controller import Robot, Motor, LightSensor, DistanceSensor
 from random import random, choices
 from math import sqrt, log, cos, pi, isnan
 from statistics import mode, stdev
@@ -16,14 +16,15 @@ LEFT_MOTOR = 0
 RIGHT_MOTOR = 1
 
 VELOCITY_KP = 0.001  # Proportional control for cruise-control velocity pid
-ANGULAR_KP = 0.01
+ANGULAR_KP = 0.001
 VELOCITY_KI = 0.1  # integral gain constant for cruise-control velocity pid
 VELOCITY_KD = 0.1  # derivative gain constant for cruise-control velocity pid
-FOLLOW_DISTANCE = 65  # distance sensor reading that is the minimum comfortable follow distance, PID will target this
+FOLLOW_DISTANCE = 80  # distance sensor reading that is the minimum comfortable follow distance, PID will target this
 
 
 class Vehicle:
-    def __init__(self, angular_kp=ANGULAR_KP,
+    def __init__(self, target_velocity,
+                 angular_kp=ANGULAR_KP,
                  velocity_kp=VELOCITY_KP,
                  velocity_ki=VELOCITY_KI,
                  velocity_kd=VELOCITY_KD,
@@ -33,42 +34,31 @@ class Vehicle:
         # but I've made them so for convenience, just in case.
         # Create the Robot instance.
         self.robot = Robot()
-        # velocity
-        self.target_velocity = 25
-        self.current_velocity = 25
-
         # get the time step of the current world.
         self.timestep = int(self.robot.getBasicTimeStep())
         # enable the drive motors
-        self.left_motor = self.robot.getDevice('left wheel motor')
-        self.right_motor = self.robot.getDevice('right wheel motor')
+        self.left_motor: Motor = self.robot.getDevice('left wheel motor')
+        self.right_motor: Motor = self.robot.getDevice('right wheel motor')
         self.left_motor.setPosition(float('inf'))
         self.right_motor.setPosition(float('inf'))
         self.left_motor.setVelocity(0.0)
         self.right_motor.setVelocity(0.0)
         # enable ground color sensors
-        self.left_ground_sensor = self.robot.getDevice('gs0')
+        self.left_ground_sensor: LightSensor = self.robot.getDevice('gs0')
         self.left_ground_sensor.enable(self.timestep)
-        self.middle_ground_sensor = self.robot.getDevice('gs1')
+        self.middle_ground_sensor: LightSensor = self.robot.getDevice('gs1')
         self.middle_ground_sensor.enable(self.timestep)
-        self.right_ground_sensor = self.robot.getDevice('gs2')
+        self.right_ground_sensor: LightSensor = self.robot.getDevice('gs2')
         self.right_ground_sensor.enable(self.timestep)
         # enable right distance sensor
-        self.front_left_distance_sensor = self.robot.getDevice('ps7')  # IR sensor pointing to the right
+        self.front_left_distance_sensor: DistanceSensor = self.robot.getDevice('ps7')  # IR sensor pointing to the right
         self.front_left_distance_sensor.enable(self.timestep)
-        self.front_right_distance_sensor = self.robot.getDevice('ps0')
+        self.front_right_distance_sensor: DistanceSensor = self.robot.getDevice('ps0')
         self.front_right_distance_sensor.enable(self.timestep)
-        # initialize encoders
-        self.last_encoder_values = [None, None]
-        self.encoders = []
-        encoder_names = ['left wheel sensor', 'right wheel sensor']
-        for i in range(2):
-            self.encoders.append(self.robot.getDevice(encoder_names[i]))
-            self.encoders[i].enable(self.timestep)
         # After this point is mostly new stuff.
-        # Ensure encoders have time to initialize to non-NaN vals
-        while any([isnan(e) for e in self.get_encoder_values()]):
-            self.robot.step(self.timestep)
+        # velocity
+        self.target_velocity = target_velocity
+        self.current_velocity = target_velocity
         # Proportional control constants
         self.angular_kp = angular_kp
         self.velocity_kp = velocity_kp
@@ -82,9 +72,24 @@ class Vehicle:
 
     def p_angular_control(self):
         """Modifies motor speeds according to the given error and proportional constant"""
-        speed_adjustment = self.angular_kp * self.calc_ground_error()  # todo: make adjustment proportional to current speed
-        self.left_motor.setVelocity(self.current_velocity - speed_adjustment)
-        self.right_motor.setVelocity(self.current_velocity + speed_adjustment)
+        speed_adjustment = self.current_velocity * self.angular_kp * self.calc_ground_error()
+        left_velocity = self.current_velocity - speed_adjustment
+        right_velocity = self.current_velocity + speed_adjustment
+        # motors have a maximum velocity specified by Webots.
+        # If adjustment requires going over this max, instead subtract the difference from other motor
+        left_max = self.left_motor.getMaxVelocity()
+        right_max = self.right_motor.getMaxVelocity()
+        if left_velocity > left_max:
+            right_velocity -= left_velocity - left_max
+            left_velocity = left_max
+        elif right_velocity > right_max:
+            left_velocity -= right_velocity - right_max
+            right_velocity = right_max
+        # Final check to make sure neither velocity is greater than the maximum
+        left_velocity = max(0, min(left_velocity, left_max))
+        right_velocity = max(0, min(right_velocity, right_max))
+        self.left_motor.setVelocity(left_velocity)
+        self.right_motor.setVelocity(right_velocity)
 
     def p_velocity_control(self, error) -> float:
         """Modifies the target speed according to proportional constant"""
@@ -101,11 +106,13 @@ class Vehicle:
 
     def update_error(self, distance):
         # calculate current error
+        print(f"{distance=}")
         if distance <= self.follow_distance:
             current_error = distance - self.follow_distance
         else:
             current_error = 0
         # add the current error to the recent error queue
+        # TODO: There is a more efficient way to do this, perhaps with queue.Queue
         if len(self.past_errors) >= 10:
             self.past_errors = self.past_errors[:10]
             self.past_errors.append(current_error)
@@ -150,46 +157,15 @@ class Vehicle:
         total_err = l_err - r_err
         return total_err
 
-    def get_encoder_values(self, dryrun=False) -> list:
-        """Returns the current encoder values.
 
-        :param dryrun: If True, doesn't modify the last_encoder_values attribute, defaults to False
-        :return: a len-2 list of the current left and right encoder values, plus Gaussian noise
-        """
-        [left, right] = [e.getValue() for e in self.encoders]
-        if not dryrun:
-            self.last_encoder_values = [left, right]
-        return [left, right]
-
-    def default_behavior(self):
-        """Default behavior provided.
-
-        Goes straight forward and prints sensor vals to console. Basically unused.
-        """
-        self.left_motor.setVelocity(self.target_velocity)  # set the left motor (radians/second)
-        self.right_motor.setVelocity(self.target_velocity)  # set the right motor (radians/second)
-        print(self.left_motor.getVelocity())
-        print(self.left_ground_sensor.getValue())
-        print(self.middle_ground_sensor.getValue())
-        print(self.right_ground_sensor.getValue())
-        print(self.right_distance_sensor.getValue())
-        new_encoder_values = self.get_encoder_values()
-        print(new_encoder_values)
-        print('-------------------------')
-
-
-# Main loop:
-# - perform simulation steps until Webots stops the controller
 def main():
     """Main function."""
-    vehicle = Vehicle()
+    vehicle = Vehicle(3.5)
     while vehicle.step() != -1:
         # Follow line
+        print(f'{vehicle.current_velocity=}')
         vehicle.pid_velocity_correction()
         vehicle.p_angular_control()
-        # Update every 5 degrees traveled
-        # If current position is at target and vehicle is reasonably certain of its position, attack
-    # break out of while loop when sure of positions and at target tower position
 
 
 if __name__ == '__main__':
